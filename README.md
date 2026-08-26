@@ -400,13 +400,18 @@ This project demonstrates practical experience with:
 * Error handling
 * Environment configuration
 * Git and GitHub
+* Docker Architecture
+* Docker Compose Services
+* Environment Configuration
+* Build and Run Commands
+* Container Ports
+* MongoDB Persistent Volume
+* Application Access
 
 ## Future Improvements
 
 Planned improvements include:
 
-* Docker containerization
-* Docker Compose deployment
 * Automated CI/CD with GitHub Actions
 * AWS deployment
 * Infrastructure provisioning with Terraform
