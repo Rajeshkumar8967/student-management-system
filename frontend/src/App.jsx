@@ -1,11 +1,18 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Dashboard from "./pages/Dashboard";
 import "./pages/Auth.css";
 const API_URL = import.meta.env.VITE_API_URL;
 
 function App() {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [username, setUsername] = useState("");
+  const [loggedIn, setLoggedIn] = useState(() =>
+    Boolean(
+      localStorage.getItem("token") &&
+      localStorage.getItem("username")
+    )
+  );
+  const [username, setUsername] = useState(
+    () => localStorage.getItem("username") || ""
+  );
 
   const [mode, setMode] = useState("login");
 
@@ -16,88 +23,76 @@ function App() {
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const savedUsername = localStorage.getItem("username");
-
-    if (token && savedUsername) {
-      setUsername(savedUsername);
-      setLoggedIn(true);
-    }
-  }, []);
 
   const handleSubmit = async (event) => {
-  event.preventDefault();
+    event.preventDefault();
 
-  setMessage("");
-  setSuccess(false);
-
-  // Basic validation
-  if (!formUsername.trim()) {
-    setMessage("Username is required.");
-    return;
-  }
-
-  if (password.length < 6) {
-    setMessage("Password must be at least 6 characters.");
-    return;
-  }
-
-  if (mode === "register" && password !== confirmPassword) {
-    setMessage("Passwords do not match.");
-    return;
-  }
-
-  setLoading(true);
-
-  const endpoint =
-  mode === "login"
-    ? `${API_URL}/api/auth/login`
-    : `${API_URL}/api/auth/register`;
-
-  try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username: formUsername.trim(),
-        password,
-      }),
-    });
-
-    const data = await response.json();
-
-    setMessage(data.message);
-    setSuccess(data.success);
-
-    if (data.success && mode === "login") {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("username", data.username);
-
-      setUsername(data.username);
-      setLoggedIn(true);
-    }
-
-    if (data.success && mode === "register") {
-      setFormUsername("");
-      setPassword("");
-      setConfirmPassword("");
-
-      setMode("login");
-      setMessage("Registration successful. Please login.");
-      setSuccess(true);
-    }
-  } catch {
-    setMessage("Unable to connect to the server.");
+    setMessage("");
     setSuccess(false);
-  } finally {
-    setLoading(false);
-  }
-};
+
+    if (!formUsername.trim()) {
+      setMessage("Username is required.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setMessage("Password must be at least 6 characters.");
+      return;
+    }
+
+    if (mode === "register" && password !== confirmPassword) {
+      setMessage("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+
+    const endpoint =
+      mode === "login"
+        ? `${API_URL}/api/auth/login`
+        : `${API_URL}/api/auth/register`;
+
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: formUsername.trim(),
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      setMessage(data.message);
+      setSuccess(data.success);
+
+      if (data.success && mode === "login") {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("username", data.username);
+
+        setUsername(data.username);
+        setLoggedIn(true);
+      }
+
+      if (data.success && mode === "register") {
+        setFormUsername("");
+        setPassword("");
+        setConfirmPassword("");
+
+        setMode("login");
+        setMessage("Registration successful. Please login.");
+        setSuccess(true);
+      }
+    } catch {
+      setMessage("Unable to connect to the server.");
+      setSuccess(false);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -123,7 +118,6 @@ function App() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-
         <h1>Student Management</h1>
 
         <h2>
@@ -175,21 +169,21 @@ function App() {
           />
 
           {mode === "register" && (
-  <>
-    <label>Confirm Password</label>
+            <>
+              <label>Confirm Password</label>
 
-    <input
-      className="auth-input"
-      type="password"
-      value={confirmPassword}
-      onChange={(event) =>
-        setConfirmPassword(event.target.value)
-      }
-      placeholder="Confirm your password"
-      required
-    />
-  </>
-)}
+              <input
+                className="auth-input"
+                type="password"
+                value={confirmPassword}
+                onChange={(event) =>
+                  setConfirmPassword(event.target.value)
+                }
+                placeholder="Confirm your password"
+                required
+              />
+            </>
+          )}
 
           <button
             className="auth-button"
@@ -231,7 +225,6 @@ function App() {
               : "Login here"}
           </button>
         </div>
-
       </div>
     </div>
   );
