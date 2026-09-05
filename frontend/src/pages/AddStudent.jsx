@@ -59,7 +59,7 @@ function AddStudent({ onStudentAdded, onCancel }) {
       if (onStudentAdded) {
         onStudentAdded();
       }
-    } catch (error) {
+    } catch {
       setMessage("Unable to connect to the server.");
       setSuccess(false);
     } finally {
