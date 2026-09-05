@@ -91,7 +91,7 @@ function App() {
       setMessage("Registration successful. Please login.");
       setSuccess(true);
     }
-  } catch (error) {
+  } catch {
     setMessage("Unable to connect to the server.");
     setSuccess(false);
   } finally {
