@@ -13,53 +13,96 @@ function Dashboard({ username, onLogout }) {
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [editingStudentId, setEditingStudentId] = useState(null);
 
-  const loadStudents = useCallback(async () => {
+  const fetchStudents = useCallback(async () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      onLogout();
-      return;
+      return { unauthorized: true };
     }
 
+    const response = await fetch(
+      `${API_URL}/api/students/`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.status === 401) {
+      return { unauthorized: true };
+    }
+
+    if (!response.ok) {
+      return {
+        error: data.message || "Unable to load students.",
+      };
+    }
+
+    return { students: data.students };
+  }, [API_URL]);
+
+  const loadStudents = useCallback(async () => {
     try {
-      const response = await fetch(
-        `${API_URL}/api/students/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const result = await fetchStudents();
 
-      const data = await response.json();
-
-      if (response.status === 401) {
+      if (result.unauthorized) {
         onLogout();
         return;
       }
 
-      if (!response.ok) {
-        setMessage(data.message || "Unable to load students.");
-
-        if (response.status === 401) {
-          onLogout();
-        }
-
+      if (result.error) {
+        setMessage(result.error);
         return;
       }
 
-      setStudents(data.students);
+      setStudents(result.students);
       setMessage("");
     } catch {
       setMessage("Unable to connect to the server.");
     } finally {
       setLoading(false);
     }
-  }, [API_URL, onLogout]);
+  }, [fetchStudents, onLogout]);
 
   useEffect(() => {
-    loadStudents();
-  }, [loadStudents]);
+    let active = true;
+
+    fetchStudents()
+      .then((result) => {
+        if (!active) {
+          return;
+        }
+
+        if (result.unauthorized) {
+          onLogout();
+          return;
+        }
+
+        if (result.error) {
+          setMessage(result.error);
+          return;
+        }
+
+        setStudents(result.students);
+      })
+      .catch(() => {
+        if (active) {
+          setMessage("Unable to connect to the server.");
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [fetchStudents, onLogout]);
 
   const handleDelete = async (studentId) => {
     const confirmed = window.confirm(
@@ -132,7 +175,6 @@ function Dashboard({ username, onLogout }) {
 
   return (
     <div className="dashboard">
-
       <nav className="navbar">
         <h1>Student Management</h1>
 
@@ -149,10 +191,7 @@ function Dashboard({ username, onLogout }) {
       </nav>
 
       <main className="dashboard-content">
-
-        {/* Statistics */}
         <div className="stats-grid">
-
           <div className="stat-card">
             <p>Total Students</p>
             <h3>{totalStudents}</h3>
@@ -167,7 +206,6 @@ function Dashboard({ username, onLogout }) {
             <p>Added Last 7 Days</p>
             <h3>{recentStudents}</h3>
           </div>
-
         </div>
 
         <div className="dashboard-header">
@@ -212,9 +250,7 @@ function Dashboard({ username, onLogout }) {
           </div>
         ) : (
           <div className="table-container">
-
             <table className="student-table">
-
               <thead>
                 <tr>
                   <th>Name</th>
@@ -227,13 +263,9 @@ function Dashboard({ username, onLogout }) {
               <tbody>
                 {filteredStudents.map((student) => (
                   <tr key={student._id}>
-
                     <td>{student.name}</td>
-
                     <td>{student.course}</td>
-
                     <td>{student.email}</td>
-
                     <td>
                       <button
                         className="edit-button"
@@ -254,19 +286,14 @@ function Dashboard({ username, onLogout }) {
                         Delete
                       </button>
                     </td>
-
                   </tr>
                 ))}
               </tbody>
-
             </table>
-
           </div>
         )}
-
       </main>
 
-      {/* Add Student Modal */}
       {showAddStudent && (
         <div
           className="modal-overlay"
@@ -288,7 +315,6 @@ function Dashboard({ username, onLogout }) {
         </div>
       )}
 
-      {/* Edit Student Modal */}
       {editingStudentId && (
         <div
           className="modal-overlay"
@@ -310,7 +336,6 @@ function Dashboard({ username, onLogout }) {
           </div>
         </div>
       )}
-
     </div>
   );
 }
