@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AddStudent from "./AddStudent";
 import EditStudent from "./EditStudent";
 import "./Dashboard.css";
@@ -13,7 +13,7 @@ function Dashboard({ username, onLogout }) {
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [editingStudentId, setEditingStudentId] = useState(null);
 
-  const loadStudents = async () => {
+  const loadStudents = useCallback(async () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -50,16 +50,16 @@ function Dashboard({ username, onLogout }) {
 
       setStudents(data.students);
       setMessage("");
-    } catch (error) {
+    } catch {
       setMessage("Unable to connect to the server.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [API_URL, onLogout]);
 
   useEffect(() => {
     loadStudents();
-  }, []);
+  }, [loadStudents]);
 
   const handleDelete = async (studentId) => {
     const confirmed = window.confirm(
@@ -85,20 +85,20 @@ function Dashboard({ username, onLogout }) {
 
       const data = await response.json();
 
-if (response.status === 401) {
-  onLogout();
-  return;
-}
+      if (response.status === 401) {
+        onLogout();
+        return;
+      }
 
-if (!response.ok) {
-  setMessage(data.message || "Unable to delete student.");
-  return;
-}
+      if (!response.ok) {
+        setMessage(data.message || "Unable to delete student.");
+        return;
+      }
 
       setMessage(data.message);
 
       await loadStudents();
-    } catch (error) {
+    } catch {
       setMessage("Unable to connect to the server.");
     }
   };
