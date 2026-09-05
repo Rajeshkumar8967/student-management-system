@@ -34,7 +34,7 @@ function EditStudent({ studentId, onUpdated, onCancel }) {
         setName(data.student.name);
         setCourse(data.student.course);
         setEmail(data.student.email);
-      } catch (error) {
+      } catch {
         setMessage("Unable to connect to the server.");
         setSuccess(false);
       } finally {
@@ -91,7 +91,7 @@ function EditStudent({ studentId, onUpdated, onCancel }) {
       setTimeout(() => {
         onUpdated();
       }, 500);
-    } catch (error) {
+    } catch {
       setMessage("Unable to connect to the server.");
       setSuccess(false);
     } finally {
