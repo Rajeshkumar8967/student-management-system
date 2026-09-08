@@ -58,5 +58,14 @@ pipeline {
                 '''
             }
         }
+
+        stage('Docker Check') {
+            steps {
+                bat '''
+                    docker --version
+                    docker compose version
+                '''
+            }
+        }
     }
 }
