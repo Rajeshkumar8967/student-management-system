@@ -41,6 +41,15 @@ pipeline {
             }
         }
 
+        stage('Test') {
+            steps {
+                bat '''
+                    cd frontend
+                    call npm test
+                '''
+            }
+        }
+
         stage('Build') {
             steps {
                 bat '''
