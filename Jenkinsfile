@@ -62,8 +62,8 @@ pipeline {
         stage('Docker Check') {
             steps {
                 bat '''
-                    docker --version
-                    docker compose version
+                    "C:\\Users\\91703\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" --version
+                    "C:\\Users\\91703\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" compose version
                 '''
             }
         }
