@@ -12,6 +12,26 @@ pipeline {
             }
         }
 
+        stage('Credentials Test') {
+            steps {
+                withCredentials([
+                    string(
+                        credentialsId: 'student-management-jwt-secret',
+                        variable: 'JWT_SECRET'
+                    )
+                ]) {
+                    bat '''
+                        if "%JWT_SECRET%"=="" (
+                            echo Credential injection FAILED
+                            exit /b 1
+                        )
+
+                        echo Jenkins credential injection SUCCESS
+                    '''
+                }
+            }
+        }
+
         stage('Lint') {
             steps {
                 bat '''
