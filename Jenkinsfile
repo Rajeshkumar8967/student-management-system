@@ -59,11 +59,11 @@ pipeline {
             }
         }
 
-        stage('Docker Check') {
+        stage('Docker Build') {
             steps {
                 bat '''
-                    "C:\\Users\\91703\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" --version
-                    "C:\\Users\\91703\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" compose version
+                    docker build -t student-management-frontend:%BUILD_NUMBER% ./frontend
+                    docker build -t student-management-backend:%BUILD_NUMBER% ./backend
                 '''
             }
         }
