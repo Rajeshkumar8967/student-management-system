@@ -67,5 +67,24 @@ pipeline {
                 '''
             }
         }
+        stage('Docker Image Validation') {
+            steps {
+                bat '''
+                    docker image inspect student-management-frontend:%BUILD_NUMBER%
+                    if %ERRORLEVEL% NEQ 0 (
+                        echo Frontend image validation FAILED
+                        exit /b %ERRORLEVEL%
+                    )
+
+                    docker image inspect student-management-backend:%BUILD_NUMBER%
+                    if %ERRORLEVEL% NEQ 0 (
+                        echo Backend image validation FAILED
+                        exit /b %ERRORLEVEL%
+                    )
+
+                    echo Docker image validation PASSED
+                '''
+            }
+        }
     }
 }
