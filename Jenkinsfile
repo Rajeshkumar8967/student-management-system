@@ -3,6 +3,11 @@ pipeline {
 
     stages {
 
+        stage('checkout ') {
+            steps {
+                    checkout scm
+            }
+        }
         stage('Install Dependencies') {
             steps {
                 bat '''
@@ -56,6 +61,12 @@ pipeline {
                     cd frontend
                     call npm run build
                 '''
+            }
+        }
+
+        stage('package') {
+            steps {
+                archiveArtifacts artifacts: 'frontend/dist/**', fingerprint: true
             }
         }
 
