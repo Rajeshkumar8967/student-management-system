@@ -86,6 +86,7 @@ pipeline {
                         echo Frontend image validation FAILED
                         exit /b %ERRORLEVEL%
                     )
+                    
 
                     docker image inspect student-management-backend:%BUILD_NUMBER%
                     if %ERRORLEVEL% NEQ 0 (
