@@ -98,9 +98,6 @@ pipeline {
                 '''
             }
         }
-    }
-}
-
         stage('Security Scan - Trivy') {
             steps {
                 bat '''
@@ -109,3 +106,5 @@ pipeline {
                 '''
             }
         }
+    }
+}
