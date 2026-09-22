@@ -3,11 +3,12 @@ pipeline {
 
     stages {
 
-        stage('checkout ') {
+        stage('Checkout') {
             steps {
-                    checkout scm
+                checkout scm
             }
         }
+
         stage('Install Dependencies') {
             steps {
                 bat '''
@@ -64,7 +65,7 @@ pipeline {
             }
         }
 
-        stage('package') {
+        stage('Package') {
             steps {
                 archiveArtifacts artifacts: 'frontend/dist/**', fingerprint: true
             }
@@ -78,17 +79,19 @@ pipeline {
                 '''
             }
         }
+
         stage('Docker Image Validation') {
             steps {
                 bat '''
                     docker image inspect student-management-frontend:%BUILD_NUMBER%
+
                     if %ERRORLEVEL% NEQ 0 (
                         echo Frontend image validation FAILED
                         exit /b %ERRORLEVEL%
                     )
-                    
 
                     docker image inspect student-management-backend:%BUILD_NUMBER%
+
                     if %ERRORLEVEL% NEQ 0 (
                         echo Backend image validation FAILED
                         exit /b %ERRORLEVEL%
@@ -98,10 +101,20 @@ pipeline {
                 '''
             }
         }
+
         stage('Security Scan - Trivy') {
             steps {
                 bat '''
+                    echo ========================================
+                    echo Trivy Security Scan - Frontend
+                    echo ========================================
+
                     trivy image --severity HIGH,CRITICAL --exit-code 1 student-management-frontend:%BUILD_NUMBER%
+
+                    echo ========================================
+                    echo Trivy Security Scan - Backend
+                    echo ========================================
+
                     trivy image --severity HIGH,CRITICAL --exit-code 1 student-management-backend:%BUILD_NUMBER%
                 '''
             }
