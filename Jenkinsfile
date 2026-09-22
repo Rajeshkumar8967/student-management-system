@@ -104,19 +104,19 @@ pipeline {
 
         stage('Security Scan - Trivy') {
             steps {
-                bat '''
-                    echo ========================================
-                    echo Trivy Security Scan - Frontend
-                    echo ========================================
+                    bat '''
+                            echo ========================================
+                            echo Trivy Security Scan - Frontend
+                            echo ========================================
 
-                    trivy image --severity HIGH,CRITICAL --exit-code 1 student-management-frontend:%BUILD_NUMBER%
+                            "C:\\Users\\91703\\AppData\\Local\\Microsoft\\WinGet\\Packages\\AquaSecurity.Trivy_Microsoft.Winget.Source_8wekyb3d8bbwe\\trivy.exe" image --severity HIGH,CRITICAL --exit-code 1 student-management-frontend:%BUILD_NUMBER%
 
-                    echo ========================================
-                    echo Trivy Security Scan - Backend
-                    echo ========================================
+                            echo ========================================
+                            echo Trivy Security Scan - Backend
+                            echo ========================================
 
-                    trivy image --severity HIGH,CRITICAL --exit-code 1 student-management-backend:%BUILD_NUMBER%
-                '''
+                            "C:\\Users\\91703\\AppData\\Local\\Microsoft\\WinGet\\Packages\\AquaSecurity.Trivy_Microsoft.Winget.Source_8wekyb3d8bbwe\\trivy.exe" image --severity HIGH,CRITICAL --exit-code 1 student-management-backend:%BUILD_NUMBER%
+                            '''
             }
         }
     }
