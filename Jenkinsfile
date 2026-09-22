@@ -100,3 +100,12 @@ pipeline {
         }
     }
 }
+
+        stage('Security Scan - Trivy') {
+            steps {
+                bat '''
+                    trivy image --severity HIGH,CRITICAL --exit-code 1 student-management-frontend:%BUILD_NUMBER%
+                    trivy image --severity HIGH,CRITICAL --exit-code 1 student-management-backend:%BUILD_NUMBER%
+                '''
+            }
+        }
