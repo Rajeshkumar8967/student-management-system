@@ -1,73 +1,125 @@
 # DevSecOps Security Scan Report
 
 ## Project
+
 Student Management System
 
 ## Scan Tool
+
 Trivy v0.74.0
 
 ## Objective
-Identify vulnerabilities and security issues in the Docker images used by the Student Management System and evaluate the effect of remediation actions.
+
+The objective of this security assessment was to identify vulnerabilities in the
+Docker images used by the Student Management System and integrate security
+scanning into the CI/CD pipeline.
 
 ---
 
-## 1. Initial Security Scan
+# 1. Initial Security Assessment
 
-### Backend Image
+## Backend Docker Image
 
-Image:
-`student-management-backend:3`
+The initial backend image used a Debian/Python-based image.
 
-The initial scan identified vulnerabilities in the Debian/Python-based backend image.
+The initial assessment identified vulnerabilities in operating-system packages
+and Python-related components.
 
-Notable findings included:
+The initial backend scan included:
 
-- CRITICAL vulnerability in `perl-base`
-- HIGH vulnerabilities in `systemd`
-- HIGH vulnerability in `util-linux`
-- MEDIUM vulnerabilities in system packages
-- Python/pip dependency vulnerabilities
-
-The initial backend scan contained:
-
-- UNKNOWN: 0
 - LOW: 1
 - MEDIUM: 5
 - HIGH: 0
 - CRITICAL: 0
+- UNKNOWN: 0
 
-The detailed scan also identified a CRITICAL `perl-base` vulnerability.
+The detailed assessment also identified a CRITICAL vulnerability in the
+`perl-base` package.
 
-### Frontend Image
+Additional findings were associated with packages such as:
 
-Image:
-`student-management-frontend:3`
+- systemd
+- util-linux
+- ncurses
+- zlib
+- perl
+- Python/pip components
 
-Initial scan:
+## Frontend Docker Image
+
+The initial frontend image used an Alpine-based image.
+
+Initial Trivy result:
 
 - HIGH: 7
 - MEDIUM: 1
 - CRITICAL: 0
+- UNKNOWN: 0
 - Total: 8 vulnerabilities
-
-The findings were primarily associated with packages in the Alpine base image, including `util-linux` and `libuuid`.
 
 ---
 
-## 2. Remediation Actions
+# 2. CI/CD Security Integration
 
-The following actions were performed:
+Trivy was integrated into the Jenkins pipeline after the Docker image build
+and image validation stages.
 
-1. Refreshed the Docker base images:
+The security stage scans both application images:
 
-   - `python:3.12-slim`
-   - `nginx:alpine`
-   - `node:20-alpine`
+- Frontend Docker image
+- Backend Docker image
 
-2. Rebuilt both Docker images without using the previous build cache.
+The pipeline uses HIGH and CRITICAL severity levels as the security gate.
 
-### Backend
+If a HIGH or CRITICAL vulnerability is detected, Trivy returns a non-zero
+exit code and the Jenkins pipeline fails.
+
+This prevents an image with unacceptable vulnerability findings from
+automatically progressing through the pipeline.
+
+---
+
+# 3. Initial Jenkins Security-Gate Result
+
+During the first Jenkins security scan, the pipeline correctly detected
+vulnerabilities in the backend Docker image.
+
+Backend result:
+
+- HIGH: 44
+- CRITICAL: 0
+- Total: 44 HIGH vulnerabilities
+
+The Jenkins pipeline therefore failed at the Trivy security stage.
+
+This confirmed that the security gate was functioning correctly.
+
+The frontend image at the same stage reported no vulnerabilities.
+
+---
+
+# 4. Remediation Actions
+
+The following improvements were implemented:
+
+### 4.1 Docker Base Image Refresh
+
+Docker base images were refreshed to obtain newer package versions.
+
+Images refreshed included:
+
+- `python:3.12-slim`
+- `python:3.12-alpine`
+- `node:20-alpine`
+- `nginx:alpine`
+
+### 4.2 No-Cache Image Rebuild
+
+Images were rebuilt using Docker's `--no-cache` option to ensure that
+previous image layers were not reused during remediation testing.
+
+Example:
 
 ```bash
 docker build --no-cache \
-  -t student-management-backend:security-fix ./backend
+  -t student-management-backend:alpine-test ./backend
